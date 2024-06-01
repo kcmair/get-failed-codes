@@ -1,14 +1,23 @@
-use yew::{html, Callback, ChangeData, Component, ComponentLink, Html};
+use serde::Deserialize;
+use yew::{Component, ComponentLink, html, Html, ShouldRender};
+use yew::format::Json;
+use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 pub struct ReadData {
     link: ComponentLink<Self>,
-    on_read: Callback<()>,
-    data: Option<String>, // Data received from the API
+    fetch_task: Option<FetchTask>,
+    data: Option<String>,
+    error: Option<String>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct ApiResponse {
+    pub data: String,
 }
 
 pub enum Msg {
     ReadData,
-    DataReceived(String),
+    DataReceived(Result<ApiResponse, anyhow::Error>),
 }
 
 impl Component for ReadData {
@@ -16,22 +25,41 @@ impl Component for ReadData {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        ReadData {
+        Self {
             link,
-            on_read: link.callback(|_| Msg::ReadData),
+            fetch_task: None,
             data: None,
+            error: None,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> bool {
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::ReadData => {
-                // Send request to API to get data
-                // Update self.data with the received data
-                // You'll need to implement this logic using the fetch API
+                let request = Request::get("http://localhost:8080/read")
+                    .body(Ok(()))
+                    .expect("Failed to build request.");
+
+                let callback = self.link.callback(
+                    |response: Response<Json<Result<ApiResponse, anyhow::Error>>>| {
+                        let Json(data) = response.into_body();
+                        Msg::DataReceived(data)
+                    },
+                );
+
+                let task = FetchService::fetch(request, callback).expect("Failed to start request");
+                self.fetch_task = Some(task);
             }
-            Msg::DataReceived(ref data) => {
-                self.data = Some(data.clone()); // Clone the data to avoid moving it
+            Msg::DataReceived(response) => {
+                match response {
+                    Ok(data) => {
+                        self.data = Some(data.data);
+                    }
+                    Err(error) => {
+                        self.error = Some(error.to_string());
+                    }
+                }
+                self.fetch_task = None;
             }
         }
         true
@@ -44,7 +72,7 @@ impl Component for ReadData {
     fn view(&self) -> Html {
         html! {
             <div>
-                <button onclick=self.on_read.clone()>
+                <button onclick=self.link.callback(|_| Msg::ReadData)>
                     {"Read Data"}
                 </button>
                 { self.render_data() }
@@ -55,9 +83,12 @@ impl Component for ReadData {
 
 impl ReadData {
     fn render_data(&self) -> Html {
-        match &self.data {
-            Some(data) => html! { <div>{ data }</div> },
-            None => html! {},
+        if let Some(ref data) = self.data {
+            html! { <div>{ data }</div> }
+        } else if let Some(ref error) = self.error {
+            html! { <div>{ error }</div> }
+        } else {
+            html! {}
         }
     }
 }
