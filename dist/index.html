@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Get Failed Codes</title>
 
-<link rel="modulepreload" href="/get-failed-codes-c895d00766d66d08.js" crossorigin=anonymous integrity="sha384-nnyZP+fpVwfq7KQCQdM+34ZiY7rxG89SI8AOPuwkzVv4zwK7uIw/Lnk2r5q2GO6O">
-<link rel="preload" href="/get-failed-codes-c895d00766d66d08_bg.wasm" crossorigin=anonymous integrity="sha384-2S0DURlBJbT4RWPiZAdiAKKCeFUg8pVmUDudNtqqp2NygN9u5WPesIJsI/WvoDnN" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/get-failed-codes-8aef91af9e01308e.js" crossorigin=anonymous integrity="sha384-nnyZP+fpVwfq7KQCQdM+34ZiY7rxG89SI8AOPuwkzVv4zwK7uIw/Lnk2r5q2GO6O">
+<link rel="preload" href="/get-failed-codes-8aef91af9e01308e_bg.wasm" crossorigin=anonymous integrity="sha384-2S0DURlBJbT4RWPiZAdiAKKCeFUg8pVmUDudNtqqp2NygN9u5WPesIJsI/WvoDnN" as="fetch" type="application/wasm"></head>
 <body>
 <div id="app"></div>
 <script type="module">
-    import init from "./pkg/get_failed_codes.js";
+    import init from "./dist/dist/get-failed-codes-8aef91af9e01308e.js";
     init();
 </script>
 
 <script type="module">
-import init, * as bindings from '/get-failed-codes-c895d00766d66d08.js';
-const wasm = await init('/get-failed-codes-c895d00766d66d08_bg.wasm');
+import init, * as bindings from '/get-failed-codes-8aef91af9e01308e.js';
+const wasm = await init('/get-failed-codes-8aef91af9e01308e_bg.wasm');
 
 
 window.wasmBindings = bindings;
