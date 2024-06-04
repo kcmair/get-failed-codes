@@ -4,15 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-yew = "0.19.3"
-gloo = { version = "0.11.0", features = ["file"] }
+yew = { version = "0.21.0", features = ["csr"] }
+wasm-bindgen = "0.2.92"
+wasm-bindgen-futures = "0.4.42"
+wasm-logger = "0.2.0"
+reqwasm = "0.5.0"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
-serde_derive = "1.0.203"
-wasm-bindgen = "0.2.92"
-reqwasm = "0.5.0"
-warp ="0.3.7"
-tokio = { version = "1", features = ["full"]}
-anyhow = "1.0.86"
 web-sys = { version = "0.3.69", features = ["DataTransfer"] }
+gloo = "0.11.0"
+gloo-file = "0.3.0"
 log = "0.4.21"
+
+[lib]
+crate-type = ["cdylib", "rlib"]

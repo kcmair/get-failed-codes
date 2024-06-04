@@ -1,0 +1,10 @@
+[build]
+release = false
+
+[serve]
+port = 8080
+open = true
+
+[[copy]]
+source = "static/index.html"
+destination = "index.html"

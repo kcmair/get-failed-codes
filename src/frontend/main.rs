@@ -1,4 +1,4 @@
-// main.rs (Frontend with Yew)
+// lib (Frontend with Yew)
 
 use yew::{html, Component, ComponentLink, Html, ShouldRender};
 

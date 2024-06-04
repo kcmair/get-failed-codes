@@ -1,11 +1,10 @@
-use yew::{html, Callback, Component, ComponentLink, Html, ShouldRender};
+use yew::prelude::*;
 use web_sys::{DragEvent, FileReader, File};
-use web_sys::wasm_bindgen::closure::Closure;
-use web_sys::wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::JsCast;
 use gloo::events::EventListener;
 
 pub struct DragAndDrop {
-    link: ComponentLink<Self>,
     on_file_uploaded: Callback<String>,
 }
 
@@ -18,9 +17,8 @@ impl Component for DragAndDrop {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        DragAndDrop {
-            link,
+    fn create(_props: &Self::Properties, link: &ComponentLink<Self>) -> Self {
+        Self {
             on_file_uploaded: link.callback(Msg::FileUploaded),
         }
     }
@@ -39,38 +37,41 @@ impl Component for DragAndDrop {
         true
     }
 
-    fn change(&mut self, _: Self::Properties) -> bool {
+    fn change(&mut self, _props: &Self::Properties) -> ShouldRender {
         false
     }
 
     fn view(&self) -> Html {
-        html! {
-            <div ondrop=self.link.callback(|e: DragEvent| {
-                e.prevent_default();
-                if let Some(files) = e.data_transfer().and_then(|dt| dt.files().get(0)) {
-                    let file = files;
-                    let reader = FileReader::new().unwrap();
-                    let file_reader = reader.clone();
-                    let link = self.link.clone();
-                    let onloadend_cb = Closure::wrap(Box::new(move || {
-                        if let Ok(result) = file_reader.result() {
-                            if let Some(content) = result.as_string() {
-                                link.send_message(Msg::ReadFileContent(content));
-                            }
+        let on_drop = self.link.callback(|e: DragEvent| {
+            e.prevent_default();
+            if let Some(files) = e.data_transfer().unwrap().files().get(0) {
+                let file = files;
+                let reader = FileReader::new().unwrap();
+                let file_reader = reader.clone();
+                let link = self.link.clone();
+                let onloadend_cb = Closure::wrap(Box::new(move || {
+                    if let Ok(result) = file_reader.result() {
+                        if let Some(content) = result.as_string() {
+                            link.send_message(Msg::ReadFileContent(content));
                         }
-                    }) as Box<dyn Fn()>);
-                    reader.set_onloadend(Some(onloadend_cb.as_ref().unchecked_ref()));
-                    reader.read_as_text(&file).unwrap();
-                    onloadend_cb.forget();
-                }
-                Msg::FileUploaded("".to_string())
-            })
-                 ondragover=self.link.callback(|e: DragEvent| {
-                     e.prevent_default();
-                     ()
-                 })>
-                <p>{"Drag and drop a JSON file here"}</p>
-            </div>
+                    }
+                }) as Box<dyn Fn()>);
+                reader.set_onloadend(Some(onloadend_cb.as_ref().unchecked_ref()));
+                reader.read_as_text(&file).unwrap();
+                onloadend_cb.forget();
+            }
+            Msg::FileUploaded("".to_string())
+        });
+
+        let on_dragover = self.link.callback(|e: DragEvent| {
+            e.prevent_default();
+            Html::default()
+        });
+
+        html! {
+        <div ondrop=on_drop ondragover=on_dragover>
+            <p>{"Drag and drop a JSON file here"}</p>
+        </div>
         }
     }
 }
